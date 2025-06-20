@@ -3,7 +3,7 @@
 
 template for NLP module coursework
 
-Full Name (as on student record): RAMYA DEVI
+Full Name (as on student record): RAMYA DEVI CHITTURI
 
 Student number: 14110439
 
