@@ -41,7 +41,7 @@ def count_syl(word, d):
     pass
 
 
-def read_novels(path=Path.cwd() / "texts" / "novels"):
+def read_novels(path=Path.cwd() / "p1-texts" / "novels"):
     """Reads texts from a directory of .txt files and returns a DataFrame with the text, title,
     author, and year"""
     data = []
@@ -49,7 +49,7 @@ def read_novels(path=Path.cwd() / "texts" / "novels"):
         title_name, author, year = file.stem.split("-")
         text = file.read_text(encoding="utf-8")
         title = title_name.replace("_", " ")
-        data.append("text":text, "title":title, "author":author, "year":int(year))
+        data.append({"text":text, "title":title, "author":author, "year":int(year)})
     df = pd.DataFrame(data)
     df_sorted = df.sort_values(by="year").reset_index(drop=True)
     return df_sorted
