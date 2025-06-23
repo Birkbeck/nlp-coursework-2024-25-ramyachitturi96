@@ -38,6 +38,24 @@ def count_syl(word, d):
     Returns:
         int: The number of syllables in the word.
     """
+    syllables_count = 0
+    if word in d:
+        phonome_list = d[word][0]
+        for p in phonome_list:
+            if p[-1].isdigit():
+                syllables_count +=1
+    else: 
+        vowels = "aeiouy" #y is considered as vowels in some cases as it gives vowel sound
+        prev_char_was_vowel = False 
+        for w in word:
+            if w in vowels and not prev_char_was_vowel:
+                syllables_count += 1
+                prev_char_was_vowel = True
+            else:
+                prev_char_was_vowel = False
+        if word.endswith("le") and word[-3] in vowels:
+            syllables_count -= 1
+    return syllables_count
     pass
 
 
