@@ -64,6 +64,13 @@ def parse(df, store_path=Path.cwd() / "pickles", out_name="parsed.pickle"):
 
 def nltk_ttr(text):
     """Calculates the type-token ratio of a text. Text is tokenized using nltk.word_tokenize."""
+    final_tokens = []
+    tokens = nltk.word_tokenize(text)
+    for token in tokens:
+        if token.isalnum():
+            final_tokens.append(token.lower())
+    ttr = len(set(final_tokens)) / len(final_tokens)
+    return ttr
     pass
 
 
