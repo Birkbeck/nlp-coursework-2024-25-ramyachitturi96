@@ -8,6 +8,7 @@ import pandas as pd
 from pathlib import Path
 import pickle
 from collections import Counter
+import math
 
 
 nlp = spacy.load("en_core_web_sm")
@@ -138,6 +139,37 @@ def get_fks(df):
 
 def subjects_by_verb_pmi(doc, target_verb):
     """Extracts the most common subjects of a given verb in a parsed document. Returns a list."""
+    subject_count = Counter()
+    verb_count = Counter()
+    subj_ver_count = Counter()
+
+    for token in doc:
+        if token.lemma_ == target_verb and token.pos_ == "VERB":
+            verb_count[token.lemma_] += 1
+            for child in token.children:
+                if child.dep_ in ('nsubj', 'nsubjpass'):
+                    subject = child.text.lower()
+                    subject_count[subject] += 1
+                    subj_ver_count[(subject, token.lemma_)] += 1
+    
+    total_subject_count = sum(subject_count.values())
+    total_verb_count = sum(verb_count.values())
+    total_subj_verb_count = sum(subj_ver_count.values())
+
+    pmi_value = {}
+    for (subject, verb), count in subj_ver_count.items():
+        prob_subject = subject_count[subject] / total_subject_count
+        prob_verb = verb_count[verb] / total_verb_count
+        prob_subj_verb = count / sum(subj_ver_count.values())
+        pmi = math.log2(prob_subject / (prob_subject * prob_verb))
+        pmi_value[subject] = pmi
+
+    result = sorted(pmi_value.items(), key = lambda x:x[1], reverse=True)[:10]
+
+    return result
+
+
+    
     pass
 
 
