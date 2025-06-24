@@ -6,6 +6,7 @@ import nltk
 import spacy
 import pandas as pd
 from pathlib import Path
+import pickle
 
 
 nlp = spacy.load("en_core_web_sm")
@@ -90,6 +91,18 @@ def read_novels(path=Path.cwd() / "p1-texts" / "novels"):
 def parse(df, store_path=Path.cwd() / "pickles", out_name="parsed.pickle"):
     """Parses the text of a DataFrame using spaCy, stores the parsed docs as a column and writes 
     the resulting  DataFrame to a pickle file"""
+    #add a columm to dataframe
+    df["parses"] = df["text"].apply(nlp)
+
+    # Serialise the resulting dataframe
+    output_path = store_path/out_name
+    store_path.mkdir(parents=True, exist_ok=True)
+    with open(output_path, 'wb') as file:
+        pickle.dump(df, file)
+    
+    #Return dataframe
+    return df
+
     pass
 
 
