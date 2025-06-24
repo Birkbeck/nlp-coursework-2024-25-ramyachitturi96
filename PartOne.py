@@ -144,6 +144,14 @@ def subjects_by_verb_pmi(doc, target_verb):
 
 def subjects_by_verb_count(doc, verb):
     """Extracts the most common subjects of a given verb in a parsed document. Returns a list."""
+    subjects = Counter()
+    for token in doc:
+        if token.pos_ == "VERB" and token.lemma_ == verb:
+            for child in token.children:
+                if child.dep_ in ('nsubj','nsubjpass'):
+                    subjects[child.text.lower()] += 1
+    return subjects.most_common(10)
+    
     pass
 
 
@@ -154,7 +162,7 @@ def adjective_counts(doc):
     for doc in df["prases"]:
         for token in doc:
             if token.pos_ == "ADJ":
-                adjectives[token.lemma_] += 1
+                adjectives[token.lemma_.lower()] += 1
     return adjectives.most_common(10)
     pass
 
