@@ -7,6 +7,7 @@ import spacy
 import pandas as pd
 from pathlib import Path
 import pickle
+from collections import Counter
 
 
 nlp = spacy.load("en_core_web_sm")
@@ -37,7 +38,7 @@ def fk_level(text, d):
     for word in words:
         total_syllabus += count_syl(word, d)
     fk_grade = (0.39 * ((total_words) / (total_sentences))) + (11.8 * ((total_syllables) / (total_words))) - 15.59
-    retrun fk_grade
+    return fk_grade
     pass
 
 
@@ -149,6 +150,12 @@ def subjects_by_verb_count(doc, verb):
 
 def adjective_counts(doc):
     """Extracts the most common adjectives in a parsed document. Returns a list of tuples."""
+    adjectives = Counter()
+    for doc in df["prases"]:
+        for token in doc:
+            if token.pos_ == "ADJ":
+                adjectives[token.lemma_] += 1
+    return adjectives.most_common(10)
     pass
 
 
