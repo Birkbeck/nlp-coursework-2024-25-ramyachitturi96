@@ -153,7 +153,12 @@ def subjects_by_verb_count(doc, verb):
     return subjects.most_common(10)
     
     pass
-
+def common_objects(doc):
+    objects = Counter()
+    for token in doc:
+        if token.dep_ == "dobj" and token.head_pos == "VERB":
+            objects[token.text.lower()] += 1
+    return objects.most_common(10)
 
 
 def adjective_counts(doc):
