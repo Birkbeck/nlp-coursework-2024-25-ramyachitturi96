@@ -35,9 +35,9 @@ def fk_level(text, d):
             words.append(word.lower())
     total_sentences = len(sentence)
     total_words = len(words) 
-    total_syllabus = 0
+    total_syllables = 0
     for word in words:
-        total_syllabus += count_syl(word, d)
+        total_syllables += count_syl(word, d)
     fk_grade = (0.39 * ((total_words) / (total_sentences))) + (11.8 * ((total_syllables) / (total_words))) - 15.59
     return fk_grade
     pass
@@ -94,7 +94,7 @@ def parse(df, store_path=Path.cwd() / "pickles", out_name="parsed.pickle"):
     """Parses the text of a DataFrame using spaCy, stores the parsed docs as a column and writes 
     the resulting  DataFrame to a pickle file"""
     #add a columm to dataframe
-    df["parses"] = df["text"].apply(nlp)
+    df["parsed"] = df["text"].apply(nlp)
 
     # Serialise the resulting dataframe
     output_path = store_path/out_name
@@ -139,40 +139,34 @@ def get_fks(df):
 
 def subjects_by_verb_pmi(doc, target_verb):
     """Extracts the most common subjects of a given verb in a parsed document. Returns a list."""
-    subject_count = Counter()
-    verb_count = Counter()
-    subj_ver_count = Counter()
+    subject_count = Counter()              #subject count in text
+    subject_target_verb_count = Counter()  #subject related to target verb
+    verb_count = 0                         #Number of verbs
+    total_tokens = len(doc)                # Length of tokens
 
     for token in doc:
-        if token.lemma_ == target_verb and token.pos_ == "VERB":
-            verb_count[token.lemma_] += 1
+        if token.dep_ in ("nsubj", "nsubjpass"):
+            subject_count[token.lemma_.lower()] += 1
+        if token.lemma_.lower() == target_verb.lower() and token.pos_ in ["VERB", "AUX"]:
+            verb_count += 1
             for child in token.children:
                 if child.dep_ in ('nsubj', 'nsubjpass'):
-                    subject = child.text.lower()
-                    subject_count[subject] += 1
-                    subj_ver_count[(subject, token.lemma_)] += 1
-    
-    total_subject_count = sum(subject_count.values())
-    total_verb_count = sum(verb_count.values())
-    total_subj_verb_count = sum(subj_ver_count.values())
-
-    pmi_value = {}
-    for (subject, verb), count in subj_ver_count.items():
-        prob_subject = subject_count[subject] / total_subject_count
-        prob_verb = verb_count[verb] / total_verb_count
-        prob_subj_verb = count / sum(subj_ver_count.values())
-        pmi = math.log2(prob_subject / (prob_subject * prob_verb))
-        pmi_value[subject] = pmi
-
-    result = sorted(pmi_value.items(), key = lambda x:x[1], reverse=True)[:10]
-
-    return result
+                    subject_target_verb_count[child.lemma_.lower(), token.text.lower()] += 1
 
 
-    
+    pmi_value = []
+    prob_verb = verb_count / total_tokens
+
+    for (subject, verb), count in subject_target_verb_count.items():
+        if subject not in subject_count or subject_count[subject] == 0:
+            continue
+        prob_subject = subject_count[subject] / total_tokens
+        prob_subj_verb = count / total_tokens
+        pmi = math.log2(prob_subj_verb / (prob_subject * prob_verb))
+        pmi_value.append((subject, verb, pmi, count))
+
+    return sorted(pmi_value, key = lambda x:x[1], reverse=True)[:10]
     pass
-
-
 
 def subjects_by_verb_count(doc, verb):
     """Extracts the most common subjects of a given verb in a parsed document. Returns a list."""
@@ -196,7 +190,7 @@ def common_objects(doc):
 def adjective_counts(doc):
     """Extracts the most common adjectives in a parsed document. Returns a list of tuples."""
     adjectives = Counter()
-    for doc in df["prases"]:
+    for doc in df["parsed"]:
         for token in doc:
             if token.pos_ == "ADJ":
                 adjectives[token.lemma_.lower()] += 1
@@ -209,26 +203,34 @@ if __name__ == "__main__":
     """
     uncomment the following lines to run the functions once you have completed them
     """
-    #path = Path.cwd() / "p1-texts" / "novels"
-    #print(path)
-    #df = read_novels(path) # this line will fail until you have completed the read_novels function above.
-    #print(df.head())
+    path = Path.cwd() / "p1-texts" / "novels"
+    print(path)
+    df = read_novels(path) # this line will fail until you have completed the read_novels function above.
+    print(df.head())
     #nltk.download("cmudict")
-    #parse(df)
-    #print(df.head())
-    #print(get_ttrs(df))
-    #print(get_fks(df))
-    #df = pd.read_pickle(Path.cwd() / "pickles" /"name.pickle")
-    # print(adjective_counts(df))
-    """ 
+    parse(df)
+    print(df.head())
+    print("TTR")
+    print(get_ttrs(df))
+    print("\n")
+    print("FKS")
+    print(get_fks(df))
+    print("\n")
+    df = pd.read_pickle(Path.cwd() / "pickles" /"parsed.pickle")
+    print("pickle file created")
+    print("\n")
+    print("adjective_count")
+    print(adjective_counts(df))
+    print("\n")
+    print("subject by verb count")
     for i, row in df.iterrows():
         print(row["title"])
         print(subjects_by_verb_count(row["parsed"], "hear"))
         print("\n")
-
+    print("subject by verb PMI")
     for i, row in df.iterrows():
         print(row["title"])
         print(subjects_by_verb_pmi(row["parsed"], "hear"))
         print("\n")
-    """
+    
 
