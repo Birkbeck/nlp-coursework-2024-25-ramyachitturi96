@@ -182,7 +182,7 @@ def subjects_by_verb_count(doc, verb):
 def common_objects(doc):
     objects = Counter()
     for token in doc:
-        if token.dep_ == "dobj" and token.head_pos == "VERB":
+        if token.dep_ == "dobj" and token.head.pos_ == "VERB":
             objects[token.text.lower()] += 1
     return objects.most_common(10)
 
@@ -223,8 +223,10 @@ if __name__ == "__main__":
     print(adjective_counts(df))
     print("\n")
     print("common_objects")
-    print(common_objects(df))
-    print("\n")
+    for i, row in df.iterrows():
+        print(row["title"])
+        print(common_objects(row["parsed"]))
+        print("\n")
     print("subject by verb count")
     for i, row in df.iterrows():
         print(row["title"])
