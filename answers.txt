@@ -1,1 +1,13 @@
 Answers to the text questions go here.
+Part One 
+d - When is the Flesch Kincaid score *not* a valid, robust or reliable estimator of text difficulty? Give two conditions. 
+
+The Flesh Kincaid score is not valid:
+1. When the text includes complex or domain specific vocabulary- The formula is only based on length of the sentence, 
+length of the words and syllables count but not on reader familarity with the content. As a result, if a book using short and simple sentences 
+might get low fk score, even though understanding its emotional depth or terminology requires maturity and subject knowledge.
+2. When text is not in standard english or in different style - The score assumes standard grammar and structure. It may miscalculate, 
+readability of text for broken grammar, poetry, informal speech or creative writing with unsual structure.
+
+Part two
+f - Explain your tokenizer function and discuss its performance.
