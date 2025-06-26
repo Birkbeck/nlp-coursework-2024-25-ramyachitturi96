@@ -222,6 +222,9 @@ if __name__ == "__main__":
     print("adjective_count")
     print(adjective_counts(df))
     print("\n")
+    print("common_objects")
+    print(common_objects(df))
+    print("\n")
     print("subject by verb count")
     for i, row in df.iterrows():
         print(row["title"])
